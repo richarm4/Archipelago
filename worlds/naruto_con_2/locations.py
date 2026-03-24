@@ -54,8 +54,7 @@ LOCATION_NAME_TO_ID = {
     "Invincible (ltd.)": 42,
     "Absolute Guard": 43,
     "Food Pills": 44,
-    
-}
+} | {f"Story Mission {x}": 44+x for x in range(1,31)}
 
 LOCATION_ADDRESS_BITS = {
     "Iruka Umino": (0x801AD2CF, 0),
@@ -101,25 +100,55 @@ LOCATION_ADDRESS_BITS = {
     "Auto Recovery": (0x801AD2DE, 5),
     "Invincible (ltd.)": (0x801AD2DE, 6),
     "Absolute Guard": (0x801AD2DE, 7),
-    "Food Pills": (0x801AD2DD, 0)
+    "Food Pills": (0x801AD2DD, 0),
+    "Story Mission 1": (0x801AD2C3, 0),
+    "Story Mission 2": (0x801AD2C3, 1),
+    "Story Mission 3": (0x801AD2C3, 2),
+    "Story Mission 4": (0x801AD2C3, 3),
+    "Story Mission 5": (0x801AD2C3, 4),
+    "Story Mission 6": (0x801AD2C3, 5),
+    "Story Mission 7": (0x801AD2C3, 6),
+    "Story Mission 8": (0x801AD2C3, 7),
+    "Story Mission 9": (0x801AD2C2, 0),
+    "Story Mission 10": (0x801AD2C2, 1),
+    "Story Mission 11": (0x801AD2C2, 2),
+    "Story Mission 12": (0x801AD2C2, 3),
+    "Story Mission 13": (0x801AD2C2, 4),
+    "Story Mission 14": (0x801AD2C2, 5),
+    "Story Mission 15": (0x801AD2C2, 6),
+    "Story Mission 16": (0x801AD2C2, 7),
+    "Story Mission 17": (0x801AD2C1, 0),
+    "Story Mission 18": (0x801AD2C1, 1),
+    "Story Mission 19": (0x801AD2C1, 2),
+    "Story Mission 20": (0x801AD2C1, 3),
+    "Story Mission 21": (0x801AD2C1, 4),
+    "Story Mission 22": (0x801AD2C1, 5),
+    "Story Mission 23": (0x801AD2C1, 6),
+    "Story Mission 24": (0x801AD2C1, 7),
+    "Story Mission 25": (0x801AD2C0, 0),
+    "Story Mission 26": (0x801AD2C0, 1),
+    "Story Mission 27": (0x801AD2C0, 2),
+    "Story Mission 28": (0x801AD2C0, 3),
+    "Story Mission 29": (0x801AD2C0, 4),
+    "Story Mission 30": (0x801AD2C0, 5),
 }
 
 TICKET_ADDRESSES = {
-    "Iruka Umino Ticket": 0x80192FD8,
-    "Neji Hyuga Ticket": 0x80192FE8,
-    "Kankuro Ticket": 0x80192FF0,
-    "Haku Ticket": 0x80192FF8,
-    "Might Guy Ticket": 0x80193008,
-    "Zabuza Ticket": 0x80193000,
-    "Crow Ticket": 0x80193010,
-    "Nine-Tailed Naruto Ticket": 0x80193020,
-    "Kakashi with Sharingan Ticket": 0x80193028,
-    "Akamaru Ticket": 0x80193018,
-    "Sasuke with Sharingan Ticket": 0x80193030,
-    "Orochimaru Ticket": 0x80193038,
-    "Mizuki Ticket": 0x80193040,
-    "Seal Ticket": 0x80193280,
-    "HP Ticket": 0x80193230
+    "Iruka Umino Coupon": 0x80192FD8,
+    "Neji Hyuga Coupon": 0x80192FE8,
+    "Kankuro Coupon": 0x80192FF0,
+    "Haku Coupon": 0x80192FF8,
+    "Might Guy Coupon": 0x80193008,
+    "Zabuza Coupon": 0x80193000,
+    "Crow Coupon": 0x80193010,
+    "Nine-Tailed Naruto Coupon": 0x80193020,
+    "Kakashi with Sharingan Coupon": 0x80193028,
+    "Akamaru Coupon": 0x80193018,
+    "Sasuke with Sharingan Coupon": 0x80193030,
+    "Orochimaru Coupon": 0x80193038,
+    "Mizuki Coupon": 0x80193040,
+    "Seal Coupon": 0x80193280,
+    "HP Coupon": 0x80193230
 }
 
 UNTICKETED = {
@@ -169,8 +198,8 @@ def create_all_locations(world: NarutoWorld) -> None:
 
 def create_regular_locations(world: NarutoWorld) -> None:
     level1 = world.get_region("Menu")
-    level2 = world.get_region("Post-Seal Ticket")
-    level3 = world.get_region("Post-HP Ticket")
+    level2 = world.get_region("Post-Seal Coupon")
+    level3 = world.get_region("Post-HP Coupon")
 
     level1_locations = get_location_names_with_ids([list(LOCATION_NAME_TO_ID.keys())[list(LOCATION_NAME_TO_ID.values()).index(x)] for x in range(1,20)])
     level1.add_locations(level1_locations, NarutoLocation)
@@ -180,6 +209,10 @@ def create_regular_locations(world: NarutoWorld) -> None:
     
     level3_locations = get_location_names_with_ids([list(LOCATION_NAME_TO_ID.keys())[list(LOCATION_NAME_TO_ID.values()).index(x)] for x in range(32,45)])
     level3.add_locations(level3_locations, NarutoLocation)
+
+    story = world.get_region("Story")
+    story_locations = get_location_names_with_ids([list(LOCATION_NAME_TO_ID.keys())[list(LOCATION_NAME_TO_ID.values()).index(x)] for x in range(45,75)])
+    story.add_locations(story_locations, NarutoLocation)
 
 def create_events(world: NarutoWorld) -> None:
     menu = world.get_region("Menu")
