@@ -25,11 +25,11 @@ def create_and_connect_regions(world: NarutoWorld) -> None:
 def create_all_regions(world: NarutoWorld) -> None:
     # Creating a region is as simple as calling the constructor of the Region class.
     level1 = Region("Menu", world.player, world.multiworld)
-    level2 = Region("Post-Seal Ticket", world.player, world.multiworld)
-    level3 = Region("Post-HP Ticket", world.player, world.multiworld)
-
+    level2 = Region("Post-Seal Coupon", world.player, world.multiworld)
+    level3 = Region("Post-HP Coupon", world.player, world.multiworld)
+    story = Region("Story", world.player, world.multiworld)
     # Let's put all these regions in a list.
-    regions = [level1, level2, level3]
+    regions = [level1, level2, level3,story]
 
     # We now need to add these regions to multiworld.regions so that AP knows about their existence.
     world.multiworld.regions += regions
@@ -41,11 +41,12 @@ def connect_regions(world: NarutoWorld) -> None:
     # Luckily, once you've submitted your regions to multiworld.regions,
     # you can get them at any time using world.get_region(...).
     level1 = world.get_region("Menu")
-    level2 = world.get_region("Post-Seal Ticket")
-    level3 = world.get_region("Post-HP Ticket") 
+    level2 = world.get_region("Post-Seal Coupon")
+    level3 = world.get_region("Post-HP Coupon")
+    story = world.get_region("Story")
 
     # You can then connect the Entrance to the target region.
     # An easy way is to use the region.connect helper.
-    
-    level1.connect(level2, "Level 1 to Level 2", lambda state: state.has("Seal Ticket", world.player))
-    level2.connect(level3, "Level 2 to Level 3", lambda state: state.has("HP Ticket", world.player))
+    level1.connect(story, "Level 1 to Story")
+    level1.connect(level2, "Level 1 to Level 2", lambda state: state.has("Seal Coupon", world.player))
+    level2.connect(level3, "Level 2 to Level 3", lambda state: state.has("HP Coupon", world.player))

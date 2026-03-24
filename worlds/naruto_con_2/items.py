@@ -8,28 +8,28 @@ if TYPE_CHECKING:
     from .world import NarutoWorld
 
 ITEM_NAME_TO_ID = {
-    "Iruka Umino Ticket": 1,
-    "Neji Hyuga Ticket": 2,
-    "Kankuro Ticket": 3,
-    "Haku Ticket": 4,
-    "Might Guy Ticket": 5,
-    "Zabuza Ticket": 6,
-    "Crow Ticket": 7,
-    "Nine-Tailed Naruto Ticket": 8,
-    "Kakashi with Sharingan Ticket": 9,
-    "Akamaru Ticket": 10,
-    "Sasuke with Sharingan Ticket": 11,
-    "Orochimaru Ticket": 12,
-    "Mizuki Ticket": 13,
-    "Seal Ticket": 14,
-    "HP Ticket": 15,
+    "Iruka Umino Coupon": 1,
+    "Neji Hyuga Coupon": 2,
+    "Kankuro Coupon": 3,
+    "Haku Coupon": 4,
+    "Might Guy Coupon": 5,
+    "Zabuza Coupon": 6,
+    "Crow Coupon": 7,
+    "Nine-Tailed Naruto Coupon": 8,
+    "Kakashi with Sharingan Coupon": 9,
+    "Akamaru Coupon": 10,
+    "Sasuke with Sharingan Coupon": 11,
+    "Orochimaru Coupon": 12,
+    "Mizuki Coupon": 13,
+    "Seal Coupon": 14,
+    "HP Coupon": 15,
     "1000 Coins": 16
 }
 ID_TO_ITEM_NAME = dict(zip(ITEM_NAME_TO_ID.values(), ITEM_NAME_TO_ID.keys()))
 
 
 DEFAULT_ITEM_CLASSIFICATIONS = {
-x: ItemClassification.progression if "Ticket" in x else ItemClassification.filler for x in list(ITEM_NAME_TO_ID.keys())
+x: ItemClassification.progression if "Coupon" in x else ItemClassification.filler for x in list(ITEM_NAME_TO_ID.keys())
 }
 
 

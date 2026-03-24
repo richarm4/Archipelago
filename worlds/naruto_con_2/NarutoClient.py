@@ -206,7 +206,7 @@ def _give_item_in_game(ctx: NarutoContext, item) -> bool:
     :return: True if the item was given successfully, False otherwise
     """
     itemname = ID_TO_ITEM_NAME[item.item]
-    if "Ticket" in itemname:
+    if "Coupon" in itemname:
         set_value_bytes(TICKET_ADDRESSES[itemname], 0, ctx.regular_price, 32, 4, "big")
     else:
         money = read_value_bytes(0x801AD2A0, 0, 32, 4, "big")
