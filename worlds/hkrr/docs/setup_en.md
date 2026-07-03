@@ -3,7 +3,7 @@
 ## Required Software
 
 - [Archipelago](https://github.com/ArchipelagoMW/Archipelago/releases/latest)
-- [The HKRR APworld](https://github.com/richarm4/Archipelago/releases)
+- [The HKRR APworld](https://github.com/richarm4/Archipelago/releases/tag/hkrr-0.1.0)
 - A legally dumped US ISO of Hello Kitty: Roller Rescue
 - [Dolphin Emulator](https://dolphin-emu.org/download/?ref=btn)
 ## How to play
