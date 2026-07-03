@@ -12,7 +12,7 @@ from Options import Choice, OptionGroup, PerGameCommonOptions, Range, Toggle
 
 class Coinsanity(Toggle):
     """
-    Make each new amount of coins on each stage a check.
+    Make each new amount of coins on each stage a check. This has yet to be made functional in the first release.
     """
 
     display_name = "Coinsanity"
