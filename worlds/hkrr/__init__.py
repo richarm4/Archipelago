@@ -3,7 +3,7 @@ from worlds.LauncherComponents import Component, Type, components, icon_paths, l
 from .world import HelloKittyWorld as HelloKittyWorld
 
 def run_client(*args: str) -> None:
-    """Run the HelloKitty Clash of Ninja 2 client with the provided arguments."""
+    """Run the Hello Kitty: Roller Rescue client with the provided arguments."""
     from .HelloKittyClient import main
 
     launch(main, name="Hello Kitty: Roller Rescue Client", args=args)
