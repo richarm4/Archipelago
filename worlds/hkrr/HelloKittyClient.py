@@ -34,12 +34,16 @@ from .items import (
 )
 from .locations import (
     LOCATION_NAME_TO_ID,
-    LEVEL_CLEAR_BYTES,
     CURRENT_STAGE,
     COIN_LEVEL_BYTES,
-    level_coins
+    boss_hp
 )
-
+tracker_loaded = False
+try:
+    from worlds.tracker.TrackerClient import TrackerGameContext as SuperContext
+    tracker_loaded = True
+except ModuleNotFoundError:
+    from CommonClient import CommonContext as SuperContext
 
 
 CONNECTION_REFUSED_GAME_STATUS = (
@@ -71,7 +75,7 @@ class HelloKittyCommandProcessor(ClientCommandProcessor):
         self.ctx = ctx
 
 
-class HelloKittyContext(CommonContext):
+class HelloKittyContext(SuperContext):
     """
     The context for Hello Kitty Roller Rescue's client.
 
@@ -107,6 +111,9 @@ class HelloKittyContext(CommonContext):
         self.currstagecoins = False
         self.timer = 0
         self.loading = False
+        self.one_hp = False
+        self.coinsanity = False
+        self.bossalive = False
 
     async def server_auth(self, password_requested: bool = False):
         """
@@ -131,8 +138,11 @@ class HelloKittyContext(CommonContext):
 
     def on_package(self, cmd: str, args: dict):
         """Handle incoming packages from the server."""
+        if cmd == "Connected":
+            self.slot_data = args["slot_data"]
+            self.coinsanity = self.slot_data["options"]["coinsanity"]
+            self.one_hp = self.slot_data["options"]["last_breath"]
         return super().on_package(cmd, args)
-
 
 
 async def locations_watcher(ctx):
@@ -150,51 +160,60 @@ async def locations_watcher(ctx):
         :param location: The location name to check
         """
         
-        if LOCATION_NAME_TO_ID[location] not in ctx.server_locations or LOCATION_NAME_TO_ID[location] in ctx.locations_checked:
+        if LOCATION_NAME_TO_ID[location] not in ctx.server_locations or LOCATION_NAME_TO_ID[location] in ctx.locations_checked or ctx.currstagecoins == False:
             return False
         if location == "The Final Countdown CLEAR":
-            if read_value_bytes(0x80DE3FF0, 0, 16, 2, "big") == 17255 and dme.read_byte(CURRENT_STAGE):
-                print(read_value_bytes(0x80DE3FF0, 0, 16, 2, "big"))
+            if dme.read_byte(CURRENT_STAGE) == 16 and read_value_bytes(0x80DE3FF0, 0, 16, 2, "big") == 17255:
                 ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
                 return True
-        address, level = (LEVEL_CLEAR_BYTES[location][0], LEVEL_CLEAR_BYTES[location][1])
-        clear_byte = dme.read_byte(address)
+        level = LOCATION_NAME_TO_ID[location]
+        clear_byte = dme.read_byte(0x804A2870)
         level_byte = dme.read_byte(CURRENT_STAGE)
-        if location == "Project Home Run CLEAR":
-            if clear_byte == 0 and level_byte == level:
+        if LOCATION_NAME_TO_ID[location] in [3,6,9,12,15]:
+            if level_byte == level and _watch_boss(ctx, level_byte):
                 ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
                 return True
-        if clear_byte == 255 and level_byte == level:
+        elif clear_byte == 255 and level_byte == level:
             ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
             return True
         return False
+    
+    def _watch_boss(ctx: HelloKittyContext, level_byte):
+        currbosshp = dme.read_byte(boss_hp[level_byte])
+        if currbosshp == 6:
+            ctx.bossalive = True
+        if ctx.bossalive and currbosshp == 0:
+            ctx.bossalive = False
+            return True
+        return False
+
     def _check_coin_flag(ctx: HelloKittyContext, location) -> bool:
         if ctx.currstage != dme.read_byte(CURRENT_STAGE):
             ctx.currstage = dme.read_byte(CURRENT_STAGE)
+            ctx.bossalive = False
             ctx.currstagecoins = False
-            ctx.loadnext = True
         
         if LOCATION_NAME_TO_ID[location] not in ctx.server_locations or LOCATION_NAME_TO_ID[location] in ctx.locations_checked:
             return False
+
         address, level, amount = COIN_LEVEL_BYTES[location][0], COIN_LEVEL_BYTES[location][1], COIN_LEVEL_BYTES[location][2]
-        coin_byte = dme.read_byte(address)
-        if ctx.loadnext == True:
-            if dme.read_byte(0x806B3906) == 255:
-                ctx.loading = True
-            if ctx.loading == True:
-                if dme.read_byte(0x806B3906) == 0:
-                    ctx.loadnext = False
-                    ctx.loading = False
-                    ctx.currstagecoins = True
-        level_byte = dme.read_byte(CURRENT_STAGE)
-        if coin_byte >= amount and ctx.currstage == level and ctx.currstagecoins == True:
+        if ctx.currstage != level: return False
+                    
+        if level in [12,15]: return False #after checking the stage is loaded we can ignore 12/15 as they have no coins
+        coin_byte = read_value_bytes(address, 0, 16, 2, "big")
+        # 316 is the max amount of coins because of Freeze Factor being loaded
+        # ignore for 255-257 in particular(00FF, 0100, 0101) as these edge cases can cause checks sending too early and there's never just that many coins
+        if coin_byte < 12:
+            ctx.currstagecoins = True
+        if coin_byte >= amount and ctx.currstagecoins == True and coin_byte < 317 and coin_byte not in [255,256,257]:
             ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
             return True
         return False
-    for location_data in LEVEL_CLEAR_BYTES:
-            _check_location_flag(ctx, location_data)
     for location_data in COIN_LEVEL_BYTES:
             _check_coin_flag(ctx, location_data)
+    for location_data in LOCATION_NAME_TO_ID:
+            _check_location_flag(ctx, location_data)
+
     
     locations_checked = ctx.locations_checked.difference(ctx.checked_locations)
     if locations_checked:
@@ -211,6 +230,8 @@ async def give_items(ctx: HelloKittyContext):
     """
     expected_idx = ctx.expected_idx
     set_value_bytes(0x806D4283, 0, ctx.stages, 8, 1, "big")
+    if ctx.one_hp:
+        set_value_bytes(0x806D428F, 0, 1, 8, 1, "big")
     # Check if there are new items.
     received_items = ctx.items_received
     if len(received_items) <= expected_idx:
@@ -343,6 +364,8 @@ def main(*launch_args: str):
         ctx = HelloKittyContext(connect, password)
         ctx.server_task = asyncio.create_task(server_loop(ctx), name="ServerLoop")
 
+        if tracker_loaded:
+            ctx.run_generator()
         if gui_enabled:
             ctx.run_gui()
         ctx.run_cli()
