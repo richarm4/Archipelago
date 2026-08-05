@@ -169,21 +169,8 @@ async def locations_watcher(ctx):
         level = LOCATION_NAME_TO_ID[location]
         clear_byte = dme.read_byte(0x804A2870)
         level_byte = dme.read_byte(CURRENT_STAGE)
-        if LOCATION_NAME_TO_ID[location] in [3,6,9,12,15]:
-            if level_byte == level and _watch_boss(ctx, level_byte):
-                ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
-                return True
-        elif clear_byte == 255 and level_byte == level:
+        if clear_byte == 255 and level_byte == level:
             ctx.locations_checked.add(LOCATION_NAME_TO_ID[location])
-            return True
-        return False
-    
-    def _watch_boss(ctx: HelloKittyContext, level_byte):
-        currbosshp = dme.read_byte(boss_hp[level_byte])
-        if currbosshp == 6:
-            ctx.bossalive = True
-        if ctx.bossalive and currbosshp == 0:
-            ctx.bossalive = False
             return True
         return False
 
